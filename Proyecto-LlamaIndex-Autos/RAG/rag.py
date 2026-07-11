@@ -40,8 +40,8 @@ from llama_parse import LlamaParse
 # --------------------------------------------------------------------------- #
 # Configuración
 # --------------------------------------------------------------------------- #
-DOC_PATH = "./Base_de_Conocimiento"
-LLAMA_CLOUD_INDEX_NAME = "catalogo_autos"          # Nombre del índice en LlamaCloud
+DOC_PATH = "../Base_de_Conocimiento"
+LLAMA_CLOUD_INDEX_NAME = "catalogoautos"          # Nombre del índice en LlamaCloud
 LLAMA_CLOUD_PROJECT_NAME = os.getenv("LLAMA_CLOUD_PROJECT_NAME", "Default")
 
 # ============================================== Paso 1: Document Loader (LlamaParse) ===============================================
@@ -107,7 +107,6 @@ def ingest_data_with_llamaparse(
         project_name=LLAMA_CLOUD_PROJECT_NAME,
         api_key=LLAMA_CLOUD_API_KEY,
         verbose=True,
-        show_progress=True,
     )
 
     logging.info("=" * 80)
