@@ -1,0 +1,27 @@
+#Para OpenAI Platform
+openai
+
+#Para LlamaIndex
+llama_index
+
+#Para LlamaCloud (Document Loader LlamaParse + índice gestionado en la nube)
+llama-parse
+llama-index-indices-managed-llama-cloud
+
+#Para Telegram
+telebot
+pyTelegramBotAPI
+
+#Es para mi .env
+python-dotenv
+
+#Chat History o Histórico de Conversación
+supabase
+
+llama-index-storage-chat-store-postgres 
+asyncpg
+
+psycopg[binary]
+
+#Para cargar configuración modular (model_config + prompt en YAML)
+PyYAML
