@@ -4,9 +4,12 @@ openai
 #Para LlamaIndex
 llama_index
 
-#Para LlamaCloud (Document Loader LlamaParse + índice gestionado en la nube)
+#Para LlamaParse (Document Loader avanzado en la nube)
 llama-parse
-llama-index-indices-managed-llama-cloud
+
+#Para Qdrant (base de datos vectorial propia)
+qdrant-client
+llama-index-vector-stores-qdrant
 
 #Para Telegram
 telebot
