@@ -24,8 +24,11 @@ Use this token to access the HTTP API:
 234230492340:OKMWEWODMFOOMFOKSDMOFKMOSDKFMO (azul)
 .....
 
+## Creamos Entorno Virtual
+conda create -n "LlamaIndex-Introduccion" python=3.11
 
+## Activamos el Entorno Virtual
+conda activate LlamaIndex-Introduccion
 
-conda activate LlamaIndex-proj-Telegram 
-
+## Instalamos las dependencias
 pip install "psycopg[binary]" asyncpg
