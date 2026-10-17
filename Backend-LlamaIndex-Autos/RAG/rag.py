@@ -64,8 +64,10 @@ COLLECTION_NAME = os.getenv("QDRANT_COLLECTION", "tenant_id_autos")
 # --------------------------------------------------------------------------- #
 # Constantes
 # --------------------------------------------------------------------------- #
-ROOT = Path(__file__).resolve().parent.parent
-DOC_PATH = str(ROOT / "Base_de_Conocimiento")
+# La Base de Conocimiento vive junto a este archivo: RAG/Base_de_Conocimiento.
+# Se resuelve desde __file__, así funciona igual desde la raíz, desde RAG/ o en Docker.
+RAG_DIR = Path(__file__).resolve().parent
+DOC_PATH = str(RAG_DIR / "Base_de_Conocimiento")
 
 CHUNK_SIZE = 1024        # Chunks grandes para aprovechar el parsing de LlamaParse
 CHUNK_OVERLAP = 200      # Overlap para mantener contexto entre chunks
@@ -132,6 +134,23 @@ def get_qdrant_client() -> qdrant_client.QdrantClient:
     )
 
 
+def get_async_qdrant_client() -> qdrant_client.AsyncQdrantClient:
+    """
+    Cliente async para las consultas del agente.
+
+    FunctionAgent es async y su tool de retrieval consulta con aquery(), que
+    usa este cliente. Sin él, cada búsqueda falla con "Async client is not
+    initialized!", el agente recibe el error como respuesta de la tool y el
+    LLM contesta de memoria.
+    """
+    return qdrant_client.AsyncQdrantClient(
+        url=QDRANT_URL.rstrip("/"),
+        api_key=QDRANT_API_KEY or None,
+        port=None,
+        timeout=60,
+    )
+
+
 def get_vector_store(
     client: qdrant_client.QdrantClient | None = None,
     collection_name: str = COLLECTION_NAME,
@@ -144,6 +163,7 @@ def get_vector_store(
     """
     return QdrantVectorStore(
         client=client or get_qdrant_client(),
+        aclient=get_async_qdrant_client(),
         collection_name=collection_name,
     )
 

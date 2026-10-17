@@ -16,7 +16,7 @@ from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient, QdrantClient
 
 from validacion_nombre_tenant_id import validar_qdrant
 
@@ -42,6 +42,7 @@ COLLECTION_SEMANTIC = os.getenv(
 QDRANT_TIMEOUT = 60
 
 _client: QdrantClient | None = None
+_aclient: AsyncQdrantClient | None = None
 
 
 def validar_nombre_coleccion(nombre: str) -> str:
@@ -95,8 +96,38 @@ def get_client() -> QdrantClient:
     return _client
 
 
+def get_async_client() -> AsyncQdrantClient:
+    """Cliente Qdrant async único para todo el proceso.
+
+    El agente (FunctionAgent) es async y su tool de retrieval consulta con
+    aquery(), que usa este cliente. Sin él, cada búsqueda falla con
+    "Async client is not initialized!", el agente recibe el error como
+    respuesta de la tool y el LLM contesta de memoria (inventando precios).
+
+    Se crea dentro del event loop que lo usa (el de FastAPI) y queda ligado a
+    él: no lo reutilices entre varios asyncio.run().
+    """
+    global _aclient
+    if _aclient is None:
+        if not QDRANT_URL:
+            raise RuntimeError(
+                "Falta QDRANT_URL en el .env. Apunta a tu servidor Qdrant "
+                "(por ejemplo https://qdrant.mi-vps.com)."
+            )
+        _aclient = AsyncQdrantClient(
+            url=QDRANT_URL,
+            port=_puerto_para(QDRANT_URL),
+            api_key=QDRANT_API_KEY or None,
+            timeout=QDRANT_TIMEOUT,
+        )
+    return _aclient
+
+
 def get_vector_store(collection_name: str) -> QdrantVectorStore:
     """Devuelve el vector store de una colección.
+
+    Lleva los dos clientes: el síncrono para indexar y contar puntos, y el
+    async para las consultas del agente.
 
     No crea la colección: Qdrant la crea sola, con la dimensión correcta, la
     primera vez que se insertan nodos.
@@ -104,6 +135,7 @@ def get_vector_store(collection_name: str) -> QdrantVectorStore:
     validar_nombre_coleccion(collection_name)
     return QdrantVectorStore(
         client=get_client(),
+        aclient=get_async_client(),
         collection_name=collection_name,
     )
 
